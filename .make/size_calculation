@@ -1,0 +1,41 @@
+const fs = require('fs')
+
+const args = {
+    files: []
+}
+
+process.argv.slice(2)
+.filter(arg => {
+    if(arg.split('=').length == 2 && arg.split("=")[0].startsWith("--")) return true
+})
+.map(arg => {
+    return [arg.split("=")[0].slice(2), arg.split("=")[1]]
+}).forEach(arg => {
+    args[arg[0]] = arg[1].replace(' ', '').split(',')
+});
+
+
+fs.readdir("./build", function(err, files) {
+    console.log("\n" + "-".repeat(process.stdout.columns) + "\n")
+    console.log("\x1b[4mMemory Calculation:\x1b[0m\n")
+
+    if (err) {
+        console.log(`\x1b[31mUnable to scan directory: ${err}\x1b[0m`);
+
+        return console.log("\n" + "-".repeat(process.stdout.columns) + "\n")
+    } 
+
+    files.forEach(file => {
+        if(file.endsWith(".ihx")) {
+            const stats = fs.statSync(`./build/${file}`)
+            const file_string = `${file}`
+            const size_string = `${(stats.size/1024).toFixed(2)} kB (${stats.size} B)`
+            console.log(`\x1b[90m${file_string}${" ".repeat(process.stdout.columns - size_string.length - file_string.length)}${size_string}\x1b[0m`)
+        }
+    })
+
+    return console.log("\n" + "-".repeat(process.stdout.columns) + "\n")
+})
+
+
+

@@ -1,0 +1,8 @@
+{
+    "device": "STM8S103",
+    "flash": {
+        "stvp_path": "C:/Program Files (x86)/STMicroelectronics/st_toolset/stvp/",
+        "stlink": "ST-LINK",
+        "device": "STM8S103F3"
+    }
+}

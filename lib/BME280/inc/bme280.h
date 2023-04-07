@@ -38,7 +38,7 @@
 #define BME280_REGISTER_HUMIDDATA 0xFD
 
 void BM280_Init(uint8_t address);
-char BM280_ReadRegister(uint8_t adress_of_slave, uint8_t command);
+int *BM280_ReadRegister(uint8_t adress_of_slave, uint8_t command);
 float BM280_ReadTemp(uint8_t address);
 float BM280_ReadHumidity(uint8_t address);
 

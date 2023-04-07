@@ -1,6 +1,6 @@
 #include "bme280.h"
 
-char dataBuffer[8];
+static int data_bme[2];
 
 void BM280_Init(uint8_t address)
 {
@@ -14,9 +14,8 @@ void BM280_Init(uint8_t address)
 }
 
 // Read temperature data from LM75A
-char BM280_ReadRegister(uint8_t adress_of_slave, uint8_t command)
+int *BM280_ReadRegister(uint8_t adress_of_slave, uint8_t command)
 {
-    uint8_t data[2];
     uint8_t _address_of_slave = adress_of_slave << 1; // Přepočet na 7bit
 
     //! 1.
@@ -42,26 +41,26 @@ char BM280_ReadRegister(uint8_t adress_of_slave, uint8_t command)
     while (!I2C_CheckEvent(I2C_EVENT_MASTER_BYTE_RECEIVED))
         ;
     //! MSB
-    data[0] = I2C_ReceiveData();    // Ulož MSB data do proměnné
-    I2C_AcknowledgeConfig(DISABLE); // Vypni zpětnou odezvu
-    I2C_GenerateSTOP(ENABLE);       // Vygeneruj stop
+    data_bme[0] = I2C_ReceiveData(); // Ulož MSB data do proměnné
+    I2C_AcknowledgeConfig(DISABLE);  // Vypni zpětnou odezvu
+    I2C_GenerateSTOP(ENABLE);        // Vygeneruj stop
     while (!I2C_CheckEvent(I2C_EVENT_MASTER_BYTE_RECEIVED))
         ;
     //! LSB
-    data[1] = I2C_ReceiveData(); // Ulož LSB data do proměnné
+    data_bme[1] = I2C_ReceiveData(); // Ulož LSB data do proměnné
 
-    // TODO Musí se tu zpracovat výstupní data
+    return data_bme; // TODO Musí se tu zpracovat výstupní data
 }
 
 float BM280_ReadTemp(uint8_t address)
 {
-    char bme_temperature[2];
+    // char bme_temperature[2];
     uint32_t temp;
     float temperature;
 
-    bme_temperature = BM280_ReadRegister(address, BME280_REGISTER_TEMPDATA);
+    BM280_ReadRegister(address, BME280_REGISTER_TEMPDATA);
 
-    temp = (bme_temperature[0] << 12) | (bme_temperature[1] << 4);
+    temp = (data_bme[0] << 12) | (data_bme[1] << 4);
 
     temp >>= 4;
     temperature = (float)temp * 0.001;
@@ -72,13 +71,13 @@ float BM280_ReadTemp(uint8_t address)
 float BM280_ReadHumidity(uint8_t address)
 {
 
-    char bme_humidity[2];
+    // char bme_humidity[2];
     uint32_t humi;
     float humidity;
 
-    bme_humidity = BM280_ReadRegister(address, BME280_REGISTER_HUMIDDATA);
+    BM280_ReadRegister(address, BME280_REGISTER_HUMIDDATA);
 
-    uint32_t humi = (bme_humidity[0] << 8) | bme_humidity[1];
+    humi = (data_bme[0] << 8) | data_bme[1];
 
     humidity = (float)humi * 0.001;
 
